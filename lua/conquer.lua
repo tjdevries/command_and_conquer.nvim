@@ -115,7 +115,7 @@ end
 conquer.key_enter = function(og_bufnr)
   local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
   local results = vim.fn.execute(lines)  -- Do not recalculate
-  local results_pretty = vim.split(vim.fn.execute(lines), "\n")
+  local results_pretty = vim.split(results, "\n")
 
   -- Copy into the '*' register
   vim.api.nvim_command(string.format(':call setreg(\'*\', \'%s\')', results))
