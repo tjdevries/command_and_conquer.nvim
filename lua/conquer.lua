@@ -118,7 +118,7 @@ conquer.key_enter = function(og_bufnr)
   local results_pretty = vim.split(results, "\n")
 
   -- Copy into the '*' register
-  vim.api.nvim_command(string.format(':call setreg(\'*\', \'%s\')', results))
+  vim.fn.setreg('*', results)
 
   -- Clear the empty line if it is at the beginning.
   if results_pretty[1] == "" then
