@@ -92,16 +92,24 @@ conquer.make_command_window = function()
   -- TODO: Tell haorenw that we don't wnat him to override this... :)
   -- TODO: Make these configurable
   local map_string = string.format(
-    "<c-o>:lua require('conquer').key_enter(%s)<CR>",
-    bufnr
+    "<c-o>:lua require('conquer').key_enter(%s, %s)<CR>",
+    bufnr,
+    false
   )
+
+  local map_string_copy = string.format(
+    "<c-o>:lua require('conquer').key_enter(%s, %s)<CR>",
+    bufnr,
+    true
+  )
+
   local map_opts = {
     noremap = true,
     silent = true,
   }
 
   vim.api.nvim_buf_set_keymap(0, 'i', '<CR>', map_string, map_opts)
-  vim.api.nvim_buf_set_keymap(0, 'i', '<M-CR>', map_string, map_opts)
+  vim.api.nvim_buf_set_keymap(0, 'i', '<M-CR>', map_string_copy, map_opts)
 
   vim.cmd(string.format(
     [[autocmd BufLeave <buffer=%s> ++nested :lua require('conquer')._clear_window(%s)]],
@@ -112,13 +120,15 @@ conquer.make_command_window = function()
   return win_id, bufnr
 end
 
-conquer.key_enter = function(og_bufnr)
+conquer.key_enter = function(og_bufnr, copyout)
   local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
   local results = vim.fn.execute(lines)  -- Do not recalculate
   local results_pretty = vim.split(results, "\n")
 
-  -- Copy into the '*' register
-  vim.fn.setreg('*', results)
+  if copyout then
+    -- Copy into the '*' register
+    vim.fn.setreg('*', results)
+  end
 
   -- Clear the empty line if it is at the beginning.
   if results_pretty[1] == "" then
