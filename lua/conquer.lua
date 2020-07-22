@@ -8,7 +8,6 @@ nmap ,cw <Plug>ConquerWin
 
 
 TODO:
-- yank the output into your clipboard easily (@stylepoint)
 - change the borderchars for the Borders to be a thin line along the bottom
 - Fix key_enter leaving around a ton of buffers and windows
   (they're sitting behidn the current buffer and window... that's kind of annoying)
@@ -115,22 +114,26 @@ end
 
 conquer.key_enter = function(og_bufnr)
   local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
-  local results = vim.split(vim.fn.execute(lines), "\n")
+  local results = vim.fn.execute(lines)  -- Do not recalculate
+  local results_pretty = vim.split(vim.fn.execute(lines), "\n")
+
+  -- Copy into the '*' register
+  vim.api.nvim_command(string.format(':call setreg(\'*\', \'%s\')', results))
 
   -- Clear the empty line if it is at the beginning.
-  if results[1] == "" then
-    table.remove(results, 1)
+  if results_pretty[1] == "" then
+    table.remove(results_pretty, 1)
   end
 
   local win_id, bufnr = make_window(
-    #results,
+    #results_pretty,
     default_width,
     math.floor(vim.o.lines / 2) + 3,
     math.floor(vim.o.columns / 2) - (default_width / 2),
     false
   )
 
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, results)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, results_pretty)
   vim.api.nvim_win_set_option(win_id, 'winhl', 'Normal:Error')
 
   if not associated_windows[og_bufnr] then
